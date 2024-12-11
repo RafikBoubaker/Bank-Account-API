@@ -10,6 +10,6 @@ public interface AccountService {
 
     void deposit(DepositDTO depositDTO);
     void withdraw(WithdrawalDTO withdrawalDTO);
-    List<StatementEntryDTO> getStatement();
+    List<StatementEntryDTO> getStatement(String accountId);
 
 }

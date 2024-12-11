@@ -23,12 +23,12 @@ public class AccountController {
     }
 
 
-
     @PostMapping("/deposit")
     @Operation(summary = "Effectuer un depot")
-    @ApiResponse(responseCode = "200", description = "Depot russi")
-    @ApiResponse(responseCode = "400", description = "Montant invalide")
+    @ApiResponse(responseCode = "200", description = "Depot réussi")
+    @ApiResponse(responseCode = "400", description = "Montant invalide ou compte inexistant")
     public ResponseEntity<Void> deposit(@Valid @RequestBody DepositDTO depositDTO) {
+
         accountService.deposit(depositDTO);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -37,7 +37,7 @@ public class AccountController {
 
     @PostMapping("/withdraw")
     @Operation(summary = "Effectuer un retrait")
-    @ApiResponse(responseCode = "200", description = "Retrait reussi")
+    @ApiResponse(responseCode = "200", description = "Retrait réussi")
     @ApiResponse(responseCode = "400", description = "Montant invalide ou solde insuffisant")
     public ResponseEntity<Void> withdraw(@Valid @RequestBody WithdrawalDTO withdrawalDTO) {
         accountService.withdraw(withdrawalDTO);
@@ -46,12 +46,11 @@ public class AccountController {
 
 
 
-    @GetMapping("/statement")
+    @GetMapping("/statement/{accountId}")
     @Operation(summary = "Obtenir le relevé de compte")
-    @ApiResponse(responseCode = "200", description = "Relevé rcupré avec succès")
-    public ResponseEntity<List<StatementEntryDTO>> getStatement() {
-        return ResponseEntity.ok(accountService.getStatement());
+    @ApiResponse(responseCode = "200", description = "Relevé récupéré avec succès")
+    public ResponseEntity<List<StatementEntryDTO>> getStatement(@PathVariable String accountId) {
+        return ResponseEntity.ok(accountService.getStatement(accountId));
     }
-
 
 }

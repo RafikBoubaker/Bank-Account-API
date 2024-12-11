@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 public interface AccountRepository {
 
     void save(BankAccount account);
-    BankAccount findAccount();
+
+    BankAccount findAccountById(String accountId);
 
 }
