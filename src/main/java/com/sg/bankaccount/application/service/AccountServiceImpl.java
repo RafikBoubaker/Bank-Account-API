@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 @Service
 public class AccountServiceImpl implements AccountService {
 
+
     private static final Logger logger = LoggerFactory.getLogger(AccountServiceImpl.class);
 
     private final AccountRepository accountRepository;
-
 
     public AccountServiceImpl(AccountRepository accountRepository) {
         this.accountRepository = accountRepository;
@@ -27,27 +27,27 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void deposit(DepositDTO depositDTO) {
-        logger.info("Depot de {} effectue", depositDTO.amount());
-        BankAccount account = accountRepository.findAccount();
+
+        logger.info("Depot effectué de {} sur le compte {}", depositDTO.amount(), depositDTO.accountId());
+
+        BankAccount account = accountRepository.findAccountById(depositDTO.accountId());
         account.deposit(depositDTO.amount());
         accountRepository.save(account);
     }
 
-
-
     @Override
     public void withdraw(WithdrawalDTO withdrawalDTO) {
-        logger.info("Retrait de {} effectue", withdrawalDTO.amount());
-        BankAccount account = accountRepository.findAccount();
+
+        logger.info("Retrait effectué de {} du compte {}", withdrawalDTO.amount(), withdrawalDTO.accountId());
+
+        BankAccount account = accountRepository.findAccountById(withdrawalDTO.accountId());
         account.withdraw(withdrawalDTO.amount());
         accountRepository.save(account);
     }
 
-
-
     @Override
-    public List<StatementEntryDTO> getStatement() {
-        BankAccount account = accountRepository.findAccount();
+    public List<StatementEntryDTO> getStatement(String accountId) {
+        BankAccount account = accountRepository.findAccountById(accountId);
         return account.getTransactions().stream()
                 .map(trx -> new StatementEntryDTO(
                         trx.getDate(),

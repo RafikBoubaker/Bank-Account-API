@@ -15,7 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,22 +29,21 @@ class AccountServiceImplTest {
 
     private AccountServiceImpl accountService;
     private BankAccount bankAccount;
+    private String accountId;
 
     @BeforeEach
     void setUp() {
-        bankAccount = new BankAccount();
-        when(accountRepository.findAccount()).thenReturn(bankAccount);
+        accountId = "test-account-id";
+        bankAccount = new BankAccount(accountId);
+        when(accountRepository.findAccountById(accountId)).thenReturn(bankAccount);
         accountService = new AccountServiceImpl(accountRepository);
     }
 
     @Test
     void shouldSuccessfullyDepositMoney() {
-
-        DepositDTO depositDTO = new DepositDTO(BigDecimal.valueOf(100));
-
+        DepositDTO depositDTO = new DepositDTO(accountId, BigDecimal.valueOf(100));
 
         accountService.deposit(depositDTO);
-
 
         verify(accountRepository).save(bankAccount);
         assertEquals(BigDecimal.valueOf(100), bankAccount.getBalance());
@@ -57,9 +56,7 @@ class AccountServiceImplTest {
 
     @Test
     void shouldThrowExceptionWhenDepositingNegativeAmount() {
-
-        DepositDTO depositDTO = new DepositDTO(BigDecimal.valueOf(-50));
-
+        DepositDTO depositDTO = new DepositDTO(accountId, BigDecimal.valueOf(-50));
 
         assertThrows(IllegalArgumentException.class, () -> {
             accountService.deposit(depositDTO);
@@ -68,13 +65,10 @@ class AccountServiceImplTest {
 
     @Test
     void shouldSuccessfullyWithdrawMoney() {
-
         bankAccount.deposit(BigDecimal.valueOf(200));
-        WithdrawalDTO withdrawalDTO = new WithdrawalDTO(BigDecimal.valueOf(100));
-
+        WithdrawalDTO withdrawalDTO = new WithdrawalDTO(accountId, BigDecimal.valueOf(100));
 
         accountService.withdraw(withdrawalDTO);
-
 
         verify(accountRepository).save(bankAccount);
         assertEquals(BigDecimal.valueOf(100), bankAccount.getBalance());
@@ -87,10 +81,8 @@ class AccountServiceImplTest {
 
     @Test
     void shouldThrowExceptionWhenWithdrawingMoreThanBalance() {
-
         bankAccount.deposit(BigDecimal.valueOf(50));
-        WithdrawalDTO withdrawalDTO = new WithdrawalDTO(BigDecimal.valueOf(100));
-
+        WithdrawalDTO withdrawalDTO = new WithdrawalDTO(accountId, BigDecimal.valueOf(100));
 
         assertThrows(InsufficientFundsException.class, () -> {
             accountService.withdraw(withdrawalDTO);
@@ -99,23 +91,18 @@ class AccountServiceImplTest {
 
     @Test
     void shouldGetAccountStatement() {
-
         bankAccount.deposit(BigDecimal.valueOf(100));
         bankAccount.withdraw(BigDecimal.valueOf(50));
 
-
-        List<StatementEntryDTO> statement = accountService.getStatement();
-
+        List<StatementEntryDTO> statement = accountService.getStatement(accountId);
 
         assertNotNull(statement);
         assertEquals(2, statement.size());
-
 
         StatementEntryDTO firstEntry = statement.get(0);
         assertEquals(BigDecimal.valueOf(100), firstEntry.amount());
         assertEquals(TransactionType.DEPOSIT.name(), firstEntry.type());
         assertEquals(BigDecimal.valueOf(100), firstEntry.balance());
-
 
         StatementEntryDTO secondEntry = statement.get(1);
         assertEquals(BigDecimal.valueOf(50), secondEntry.amount());
@@ -124,11 +111,10 @@ class AccountServiceImplTest {
     }
 
     @Test
-    void shouldCallRepositoryToFindAccount() {
+    void shouldCallRepositoryToFindAccountById() {
+        List<StatementEntryDTO> statement = accountService.getStatement(accountId);
 
-        accountService.getStatement();
-
-
-        verify(accountRepository).findAccount();
+        verify(accountRepository).findAccountById(accountId);
+        assertNotNull(statement);
     }
 }

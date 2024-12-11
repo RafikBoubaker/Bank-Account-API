@@ -5,18 +5,23 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.UUID;
 
 
 public class BankAccount {
+    private String id;
     private BigDecimal balance;
     private List<Transaction> transactions;
 
-    public BankAccount() {
+    public BankAccount(String id) {
+        this.id = id;
         this.balance = BigDecimal.ZERO;
         this.transactions = new ArrayList<>();
     }
 
+    public String getId() {
+        return id;
+    }
 
 
     public void deposit(BigDecimal amount) {
